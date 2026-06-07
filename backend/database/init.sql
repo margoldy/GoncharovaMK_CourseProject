@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS family_members (
     login VARCHAR(50) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     full_name VARCHAR(100) NOT NULL,
-    role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'user')),
+    role VARCHAR(20) NOT NULL CHECK (role IN ('admin', 'user', 'pending')),
     relation VARCHAR(50)
 );
 
@@ -58,6 +58,19 @@ CREATE TABLE IF NOT EXISTS transfers (
     CHECK (from_account_id <> to_account_id)
 );
 
+-- Журнал действий
+CREATE TABLE IF NOT EXISTS logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    user_login VARCHAR(50) NOT NULL,
+    action VARCHAR(100) NOT NULL,
+    entity_type VARCHAR(50),
+    entity_id INTEGER,
+    details TEXT,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES family_members(id) ON DELETE CASCADE
+);
+
 -- Справочник счетов
 INSERT OR IGNORE INTO accounts_types (account_name, description)
 VALUES
@@ -76,7 +89,8 @@ VALUES
 ('Одежда'),
 ('Развлечения'),
 ('Здоровье'),
-('Прочее');
+('Прочее'),
+('Заначка');
 
 -- Категории доходов
 INSERT OR IGNORE INTO income_types (name) 
@@ -91,7 +105,7 @@ VALUES
 INSERT OR IGNORE INTO family_members (login, password_hash, full_name, role, relation)
 VALUES (
     'admin',
-    '$2b$10$9cqjrqxVJnHGlT1ZQkzZ2eOxgR32w5Ae3ZQEYLdLqZJYX4YqUw0Y2',
+    '$2b$10$GYH3mZg4dvCSxrKtXDtflOyAQ9f/E3GgOEax0SRuq26lCownEwxVC',
     'Администратор',
     'admin',
     NULL
